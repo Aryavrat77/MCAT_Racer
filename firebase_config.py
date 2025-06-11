@@ -2,6 +2,7 @@ import firebase_admin
 from firebase_admin import credentials, db
 import os
 import streamlit as st
+import json
 
 # Firebase configuration
 FIREBASE_DB_URL = "https://mcat-quizracer-default-rtdb.firebaseio.com/"
@@ -15,7 +16,20 @@ def init_firebase():
         try:
             # Try to get credentials from Streamlit secrets
             if 'firebase' in st.secrets:
-                cred = credentials.Certificate(st.secrets['firebase'])
+                # Convert Streamlit secrets to the format Firebase expects
+                firebase_creds = {
+                    "type": st.secrets.firebase.type,
+                    "project_id": st.secrets.firebase.project_id,
+                    "private_key_id": st.secrets.firebase.private_key_id,
+                    "private_key": st.secrets.firebase.private_key,
+                    "client_email": st.secrets.firebase.client_email,
+                    "client_id": st.secrets.firebase.client_id,
+                    "auth_uri": st.secrets.firebase.auth_uri,
+                    "token_uri": st.secrets.firebase.token_uri,
+                    "auth_provider_x509_cert_url": st.secrets.firebase.auth_provider_x509_cert_url,
+                    "client_x509_cert_url": st.secrets.firebase.client_x509_cert_url
+                }
+                cred = credentials.Certificate(firebase_creds)
             else:
                 # Fallback to local file
                 cred = credentials.Certificate("firebase_key.json")
